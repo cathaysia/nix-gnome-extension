@@ -85,4 +85,7 @@ jobs:
           git add -f state.json
           git commit -m "update exporter state"
           git push origin update-db:db --force
-          git checkout -
+          # Move HEAD back to master without touching index or worktree;
+          # plain `git checkout -` would abort on the now-untracked files.
+          git symbolic-ref HEAD refs/heads/master
+          git reset --mixed
