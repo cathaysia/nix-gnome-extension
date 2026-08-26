@@ -26,12 +26,20 @@ let
       acc: file: acc // builtins.fromJSON (builtins.readFile (dataPath + "/${file}"))
     ) { } files;
 
+  # Accepts either "uuid" / "uuid.<int version>" strings (a trailing
+  # all-digit segment is a version pin; uuid hosts never end in digits) or
+  # { uuid; version; } sets.
   normalize =
     entry:
     if lib.isString entry then
+      let
+        parts = lib.splitString "." entry;
+        last = lib.last parts;
+        pinned = builtins.match "[0-9]+" last != null && builtins.length parts > 1;
+      in
       {
-        uuid = entry;
-        version = null;
+        uuid = if pinned then lib.concatStringsSep "." (lib.init parts) else entry;
+        version = if pinned then builtins.fromJSON last else null;
       }
     else
       {

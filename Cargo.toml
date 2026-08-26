@@ -11,6 +11,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = "1"
+async-stream = "0.3"
 clap = { version = "4", features = ["derive"] }
 diesel = { version = "2.2", features = ["sqlite"] }
 futures = "0.3"
