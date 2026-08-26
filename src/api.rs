@@ -82,6 +82,14 @@ impl GnomeClient {
 
     /// GET with retry and exponential backoff (1s, 3s, 9s).
     pub async fn get_bytes(&self, url: &str) -> Result<Vec<u8>> {
+        self.try_get_bytes(url)
+            .await?
+            .ok_or_else(|| anyhow!("GET {url}: unexpected 404"))
+    }
+
+    async fn try_get_bytes(&self, url: &str) -> Result<Option<Vec<u8>>> {
+        use reqwest::StatusCode;
+
         let mut delay = Duration::from_secs(1);
         let mut last_err: Option<anyhow::Error> = None;
         for attempt in 0..MAX_RETRIES {
@@ -91,8 +99,12 @@ impl GnomeClient {
                 delay *= 3;
             }
             let result = async {
-                let resp = self.http.get(url).send().await?.error_for_status()?;
-                Ok(resp.bytes().await?.to_vec())
+                let resp = self.http.get(url).send().await?;
+                if resp.status() == StatusCode::NOT_FOUND {
+                    return Ok(None);
+                }
+                let resp = resp.error_for_status()?;
+                Ok(Some(resp.bytes().await?.to_vec()))
             }
             .await;
             match result {
@@ -104,10 +116,17 @@ impl GnomeClient {
             .with_context(|| format!("GET {url}"))
     }
 
-    pub async fn query_page(&self, sort: &str, page: u64) -> Result<QueryResponse> {
+    /// Query one page. Returns `Ok(None)` when the site answers 404, which is
+    /// how its paginator signals a page beyond the end (no empty-list page).
+    pub async fn query_page(&self, sort: &str, page: u64) -> Result<Option<QueryResponse>> {
         let url = format!("{BASE_URL}/extension-query/?sort={sort}&page={page}");
-        let body = self.get_bytes(&url).await?;
-        serde_json::from_slice(&body).with_context(|| format!("decode response of {url}"))
+        let body = match self.try_get_bytes(&url).await? {
+            Some(bytes) => bytes,
+            None => return Ok(None),
+        };
+        serde_json::from_slice(&body)
+            .map(Some)
+            .with_context(|| format!("decode response of {url}"))
     }
 
     /// Canonical asset URL for a version tag. Follows a 302 to the REST API.

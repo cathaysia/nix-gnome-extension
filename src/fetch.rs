@@ -36,7 +36,10 @@ pub async fn fetch_extensions(
             break;
         }
 
-        let resp = client.query_page(sort, page).await?;
+        let Some(resp) = client.query_page(sort, page).await? else {
+            info!(page, "page beyond end (404), enumeration complete");
+            break;
+        };
         if page == 1 {
             info!(
                 sort,
