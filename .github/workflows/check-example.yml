@@ -1,0 +1,26 @@
+name: check-example
+
+on:
+  workflow_dispatch:
+  pull_request:
+  schedule:
+    # Daily so drift between upstream data and pinned versions surfaces.
+    - cron: "0 0 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            access-tokens = github.com=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build example
+        working-directory: example
+        run: |
+          nix build -L .#default

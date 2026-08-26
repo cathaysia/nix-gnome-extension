@@ -3,6 +3,7 @@ mod db;
 mod export;
 mod fetch;
 mod hash;
+mod mini_json;
 mod models;
 mod nix_hash;
 mod schema;

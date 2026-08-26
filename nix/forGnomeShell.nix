@@ -83,32 +83,43 @@ let
 
   mkExtension =
     uuid: entry:
-    pkgs.stdenv.mkDerivation {
+    let
       pname = lib.head (lib.splitString "@" uuid);
       version = builtins.toString entry.v;
+    in
+    pkgs.stdenv.mkDerivation {
+      inherit pname version;
 
-      src = pkgs.fetchzip {
+      src = pkgs.fetchurl {
+        # Explicit name so the stored file ends in ".zip"; without it curl
+        # saves the full URL basename including "?version_tag=N" and the
+        # unpacker cannot detect the archive type.
+        name = "${pname}-${version}.zip";
         url = "https://extensions.gnome.org/download-extension/${uuid}.shell-extension.zip?version_tag=${builtins.toString entry.t}";
         sha256 = entry.h;
-        # Most extension zips carry metadata.json at their root; stripRoot
-        # would otherwise fail or misbehave.
-        stripRoot = false;
       };
 
+      nativeBuildInputs = [ pkgs.unzip ];
+
+      # Generic unpackPhase chokes on zips with a mixed root layout;
+      # unpack explicitly instead.
+      dontUnpack = true;
       dontConfigure = true;
       dontBuild = true;
 
       installPhase = ''
         runHook preInstall
-        src_root="$src"
-        if [ ! -f "$src_root/metadata.json" ]; then
-          sub="$(find "$src_root" -mindepth 1 -maxdepth 1 -type d | head -n1)"
+        tmp="$(mktemp -d)"
+        unzip -q "$src" -d "$tmp"
+        root="$tmp"
+        if [ ! -f "$root/metadata.json" ]; then
+          sub="$(find "$tmp" -mindepth 1 -maxdepth 1 -type d | head -n1)"
           if [ -f "$sub/metadata.json" ]; then
-            src_root="$sub"
+            root="$sub"
           fi
         fi
         mkdir -p "$out/share/gnome-shell/extensions/${uuid}"
-        cp -r "$src_root/." "$out/share/gnome-shell/extensions/${uuid}/"
+        cp -r "$root/." "$out/share/gnome-shell/extensions/${uuid}/"
         runHook postInstall
       '';
 
@@ -118,9 +129,10 @@ let
         gnomeShellVersions = entry.s;
       };
 
+      # No meta.platforms restriction: the derivation merely unpacks an
+      # arch-independent zip.
       meta = {
         description = "GNOME Shell extension ${uuid}";
-        platforms = lib.platforms.linux;
       };
     };
 in

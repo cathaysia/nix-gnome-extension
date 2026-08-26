@@ -92,7 +92,7 @@ pub fn export(conn: &mut SqliteConnection, out_dir: &Path) -> Result<(usize, usi
     }
 
     for (idx, shard) in shards.iter().enumerate() {
-        let json = serde_json::to_string_pretty(shard)?;
+        let json = crate::mini_json::to_string(shard);
         fs::write(out_dir.join(format!("data_{idx}.json")), json)?;
     }
 
