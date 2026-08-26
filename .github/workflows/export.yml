@@ -34,10 +34,14 @@ jobs:
         run: |
           if git ls-remote --exit-code origin db >/dev/null 2>&1; then
             git fetch origin db --depth 1
-            git checkout origin/db -- db.sqlite3.tar.xz
-            tar -xf db.sqlite3.tar.xz
-            rm db.sqlite3.tar.xz
-            echo "restored db.sqlite3 from origin/db"
+            if git cat-file -e origin/db:db.sqlite3.tar.xz 2>/dev/null; then
+              git checkout origin/db -- db.sqlite3.tar.xz
+              tar -xf db.sqlite3.tar.xz
+              rm db.sqlite3.tar.xz
+              echo "restored db.sqlite3 from origin/db"
+            else
+              echo "db branch predates sqlite state; starting fresh"
+            fi
           else
             echo "no previous state; starting fresh"
           fi
