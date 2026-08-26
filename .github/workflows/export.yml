@@ -35,7 +35,10 @@ jobs:
           if git ls-remote --exit-code origin db >/dev/null 2>&1; then
             git fetch origin db --depth 1
             if git cat-file -e origin/db:db.sqlite3.tar.xz 2>/dev/null; then
-              git checkout origin/db -- db.sqlite3.tar.xz
+              # Extract via git show: unlike `git checkout <ref> --`, this
+              # leaves the index untouched, so the tarball cannot leak into
+              # later data commits.
+              git show origin/db:db.sqlite3.tar.xz > db.sqlite3.tar.xz
               tar -xf db.sqlite3.tar.xz
               rm db.sqlite3.tar.xz
               echo "restored db.sqlite3 from origin/db"
@@ -69,6 +72,24 @@ jobs:
       - name: Export data shards
         run: ./target/release/exporter --output data/gnome
 
+      - name: Persist exporter state to db branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The exporter vacuums the database before exiting; pack it like
+          # nix4vscode does for its sqlite state. Persisting BEFORE the data
+          # commit keeps hash progress even if that commit/push fails.
+          tar -cjf db.sqlite3.tar.xz db.sqlite3
+          git checkout --orphan update-db
+          git rm -rf --cached . -q
+          git add -f db.sqlite3.tar.xz
+          git commit -m "update exporter state"
+          git push origin update-db:db --force
+          # Move HEAD back to master without touching index or worktree;
+          # plain `git checkout -` would abort on now-untracked files.
+          git symbolic-ref HEAD refs/heads/master
+          git reset --mixed
+
       - name: Commit data updates to master
         run: |
           git config user.name "github-actions[bot]"
@@ -81,20 +102,3 @@ jobs:
           else
             echo "no data changes"
           fi
-
-      - name: Persist exporter state to db branch
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # The exporter vacuums the database before exiting; pack it like
-          # nix4vscode does for its sqlite state.
-          tar -cjf db.sqlite3.tar.xz db.sqlite3
-          git checkout --orphan update-db
-          git rm -rf --cached . -q
-          git add -f db.sqlite3.tar.xz
-          git commit -m "update exporter state"
-          git push origin update-db:db --force
-          # Move HEAD back to master without touching index or worktree;
-          # plain `git checkout -` would abort on now-untracked files.
-          git symbolic-ref HEAD refs/heads/master
-          git reset --mixed
