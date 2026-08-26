@@ -1,0 +1,88 @@
+name: export-gnome
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_pages:
+        description: "Limit enumeration pages (0 = all)"
+        default: "0"
+      limit:
+        description: "Limit hashed assets this run (0 = all missing)"
+        default: "0"
+      batch_size:
+        description: "Hash download concurrency"
+        default: "8"
+  schedule:
+    # Daily at 00:30 UTC
+    - cron: "30 0 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Restore exporter state from db branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git ls-remote --exit-code origin db >/dev/null 2>&1; then
+            git fetch origin db --depth 1
+            git checkout origin/db -- state.json
+            echo "restored state.json from origin/db"
+          else
+            echo "no previous state; starting fresh"
+          fi
+
+      - name: Build exporter
+        run: cargo build --release
+
+      - name: Enumerate extensions
+        env:
+          MAX_PAGES: ${{ inputs.max_pages || '0' }}
+        run: |
+          args=()
+          if [ "$MAX_PAGES" != "0" ]; then args+=(--max-pages "$MAX_PAGES"); fi
+          ./target/release/exporter --fetch "${args[@]}"
+
+      - name: Hash assets
+        env:
+          LIMIT: ${{ inputs.limit || '0' }}
+          BATCH_SIZE: ${{ inputs.batch_size || '8' }}
+        run: |
+          args=(--batch-size "$BATCH_SIZE" --max-run-time 18000)
+          if [ "$LIMIT" != "0" ]; then args+=(--limit "$LIMIT"); fi
+          ./target/release/exporter --hash "${args[@]}"
+
+      - name: Export data shards
+        run: ./target/release/exporter --output data/gnome
+
+      - name: Commit data updates to master
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain data/gnome)" ]; then
+            git add data/gnome
+            git commit -m "chore(data): update GNOME extensions"
+            git pull --rebase origin master
+            git push
+          else
+            echo "no data changes"
+          fi
+
+      - name: Persist exporter state to db branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan update-db
+          git rm -rf --cached . -q
+          git add -f state.json
+          git commit -m "update exporter state"
+          git push origin update-db:db --force
+          git checkout -
