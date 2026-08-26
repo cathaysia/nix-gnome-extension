@@ -1,38 +1,44 @@
-//! Hashing phase: concurrently download each asset and compute its
-//! Nix-base32 SHA-256. Progress is checkpointed into the state file so runs
-//! are resumable.
+//! Hashing phase: concurrently download each unhashed asset and store its
+//! Nix-base32 SHA-256 in SQLite. Every update persists immediately, so runs
+//! are resumable without explicit checkpoints.
 
-use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
 use anyhow::{bail, Result};
+use diesel::prelude::*;
 use futures::stream::{self, StreamExt};
 use tokio::sync::Mutex;
-use tracing::{debug, error, info};
+use tracing::{error, info};
 
-use crate::{api::GnomeClient, nix_hash::sha256_nix_base32, state::State};
+use crate::{
+    api::GnomeClient,
+    nix_hash::sha256_nix_base32,
+    schema::assets::{self, dsl},
+};
 
-const SAVE_EVERY: usize = 50;
+const PROGRESS_EVERY: usize = 50;
 
 pub async fn fetch_hash(
     client: &GnomeClient,
-    state: Arc<Mutex<State>>,
-    state_path: PathBuf,
+    conn: Arc<Mutex<SqliteConnection>>,
     batch_size: usize,
     limit: usize,
 ) -> Result<usize> {
-    let (targets, missing_total): (Vec<(u64, String)>, usize) = {
-        let st = state.lock().await;
-        let missing_total = st.missing_hashes();
-        let targets = st
-            .rows
-            .iter()
-            .filter(|(_, row)| row.hash.as_deref().is_none_or(str::is_empty))
-            .take(if limit == 0 { usize::MAX } else { limit })
-            .map(|(tag, row)| (*tag, row.uuid.clone()))
-            .collect();
-        (targets, missing_total)
+    let (targets, missing_total): (Vec<(i32, String)>, usize) = {
+        let mut db = conn.lock().await;
+        let all: Vec<(i32, String)> = dsl::assets
+            .filter(dsl::hash.is_null().or(dsl::hash.eq("")))
+            .order_by(dsl::version_tag)
+            .select((dsl::version_tag, dsl::uuid))
+            .load(&mut *db)?;
+        let total = all.len();
+        let targets = if limit == 0 {
+            all
+        } else {
+            all.into_iter().take(limit).collect()
+        };
+        (targets, total)
     };
     info!(
         total_missing = missing_total,
@@ -45,25 +51,23 @@ pub async fn fetch_hash(
 
     stream::iter(targets)
         .map(|(tag, uuid)| {
-            let state = Arc::clone(&state);
-            let state_path = state_path.clone();
+            let conn = Arc::clone(&conn);
             let completed = Arc::clone(&completed);
             async move {
                 match hash_asset(client, &uuid, tag).await {
                     Ok(digest) => {
+                        let mut db = conn.lock().await;
+                        if let Err(err) = diesel::update(assets::table.find(tag))
+                            .set(dsl::hash.eq(Some(digest)))
+                            .execute(&mut *db)
                         {
-                            let mut st = state.lock().await;
-                            if let Some(row) = st.rows.get_mut(&tag) {
-                                row.hash = Some(digest);
-                            }
+                            error!(tag, ?err, "failed to persist hash");
+                            return;
                         }
+                        drop(db);
                         let n = completed.fetch_add(1, Ordering::SeqCst) + 1;
-                        if n.is_multiple_of(SAVE_EVERY) {
-                            let st = state.lock().await;
-                            if let Err(err) = st.save(&state_path) {
-                                error!(?err, "checkpoint save failed");
-                            }
-                            debug!(done = n, "checkpoint saved");
+                        if n.is_multiple_of(PROGRESS_EVERY) {
+                            info!(done = n, "progress");
                         }
                     }
                     Err(err) => {
@@ -76,17 +80,19 @@ pub async fn fetch_hash(
         .for_each(|_| async {})
         .await;
 
-    // Final save with whatever progress was made.
-    {
-        let st = state.lock().await;
-        st.save(&state_path)?;
-    }
-
     Ok(completed.load(Ordering::SeqCst))
 }
 
-async fn hash_asset(client: &GnomeClient, uuid: &str, tag: u64) -> Result<String> {
-    let url = GnomeClient::download_url(uuid, tag);
+pub fn missing_count(conn: &mut SqliteConnection) -> Result<usize> {
+    let count: i64 = dsl::assets
+        .filter(dsl::hash.is_null().or(dsl::hash.eq("")))
+        .select(diesel::dsl::count_star())
+        .get_result(conn)?;
+    Ok(count as usize)
+}
+
+async fn hash_asset(client: &GnomeClient, uuid: &str, tag: i32) -> Result<String> {
+    let url = GnomeClient::download_url(uuid, tag as u64);
     let data = client.get_bytes(&url).await?;
     if data.is_empty() {
         bail!("empty body for {uuid} tag {tag}");

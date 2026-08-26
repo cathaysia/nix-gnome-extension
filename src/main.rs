@@ -1,9 +1,11 @@
 mod api;
+mod db;
 mod export;
 mod fetch;
 mod hash;
+mod models;
 mod nix_hash;
-mod state;
+mod schema;
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -17,7 +19,7 @@ use tracing_subscriber::EnvFilter;
 
 #[derive(Debug, Parser)]
 struct Args {
-    /// Fetch extension list from extensions.gnome.org into the state file.
+    /// Fetch extension list from extensions.gnome.org into the state database.
     #[arg(long)]
     fetch: bool,
 
@@ -29,9 +31,9 @@ struct Args {
     #[arg(short, long)]
     output: Option<PathBuf>,
 
-    /// Resumable state file path.
-    #[arg(long, default_value = "state.json")]
-    state: PathBuf,
+    /// SQLite state database path.
+    #[arg(long, default_value = "db.sqlite3")]
+    db: PathBuf,
 
     /// Concurrency of the hashing download pool.
     #[arg(long, default_value_t = 8)]
@@ -68,51 +70,60 @@ async fn main() -> Result<()> {
     }
 
     let client = api::GnomeClient::new()?;
-    let state = Arc::new(Mutex::new(state::State::load(&args.state)?));
-    info!(state = %args.state.display(), rows = state.lock().await.rows.len(), "state loaded");
+    let mut conn = db::establish(&args.db)?;
+    db::ensure_schema(&mut conn)?;
+    info!(
+        db = %args.db.display(),
+        assets = db::asset_count(&mut conn)?,
+        "database ready"
+    );
 
     if args.fetch {
-        let (extensions, added) = fetch::fetch_extensions(
-            &client,
-            &mut *state.lock().await,
-            &args.sort,
-            args.max_pages,
-        )
-        .await?;
-        let locked = state.lock().await;
-        info!(extensions, added, assets = locked.rows.len(), "fetch done");
-        locked.save(&args.state)?;
+        let (extensions, added) =
+            fetch::fetch_extensions(&client, &mut conn, &args.sort, args.max_pages).await?;
+        info!(
+            extensions,
+            added,
+            assets = db::asset_count(&mut conn)?,
+            "fetch done"
+        );
     }
 
     if args.hash {
-        let run = hash::fetch_hash(
-            &client,
-            Arc::clone(&state),
-            args.state.clone(),
-            args.batch_size,
-            args.limit,
-        );
-        let done = if args.max_run_time > 0 {
-            match tokio::time::timeout(Duration::from_secs(args.max_run_time), run).await {
-                Ok(result) => result?,
-                Err(_) => {
-                    info!("max-run-time reached; partial progress saved");
-                    0
+        conn = {
+            let shared = Arc::new(Mutex::new(conn));
+            let run = hash::fetch_hash(&client, Arc::clone(&shared), args.batch_size, args.limit);
+            let done = if args.max_run_time > 0 {
+                match tokio::time::timeout(Duration::from_secs(args.max_run_time), run).await {
+                    Ok(result) => result?,
+                    Err(_) => {
+                        info!("max-run-time reached; partial progress persisted");
+                        0
+                    }
                 }
-            }
-        } else {
-            run.await?
+            } else {
+                run.await?
+            };
+            let mut owned = Arc::try_unwrap(shared)
+                .map_err(|_| ())
+                .expect("connection uniquely held after hashing")
+                .into_inner();
+            info!(
+                hashed = done,
+                remaining = hash::missing_count(&mut owned)?,
+                "hash done"
+            );
+            owned
         };
-        info!(
-            hashed = done,
-            remaining = state.lock().await.missing_hashes(),
-            "hash done"
-        );
+    }
+
+    if args.output.is_some() || args.fetch || args.hash {
+        // Compact before CI packs the database for the db branch.
+        db::vacuum(&mut conn)?;
     }
 
     if let Some(out_dir) = args.output {
-        let locked = state.lock().await;
-        let (extensions, assets) = export::export(&locked, &out_dir)?;
+        let (extensions, assets) = export::export(&mut conn, &out_dir)?;
         info!(extensions, assets, "export done");
     }
 

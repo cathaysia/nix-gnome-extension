@@ -11,22 +11,26 @@
 //! - Entries sorted by descending version, keys alphabetical, shards assigned
 //!   by FNV-1a so output is byte-stable across runs.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs;
 use std::path::Path;
 
 use anyhow::Result;
+use diesel::prelude::*;
 use serde::Serialize;
 use tracing::info;
 
-use crate::state::State;
+use crate::{
+    models::Asset,
+    schema::{asset_shells, assets},
+};
 
 const SHARDS: usize = 16;
 
 #[derive(Debug, Serialize)]
 struct ExportedEntry {
-    v: u64,
-    t: u64,
+    v: i32,
+    t: i32,
     h: String,
     s: Vec<String>,
 }
@@ -40,29 +44,45 @@ fn fnv1a(value: &str) -> u32 {
     hash
 }
 
-pub fn export(state: &State, out_dir: &Path) -> Result<(usize, usize)> {
-    let mut by_uuid: BTreeMap<String, Vec<ExportedEntry>> = BTreeMap::new();
-    let mut assets = 0usize;
+pub fn export(conn: &mut SqliteConnection, out_dir: &Path) -> Result<(usize, usize)> {
+    let hashed: Vec<Asset> = assets::table
+        .filter(assets::hash.is_not_null())
+        .filter(assets::hash.ne(""))
+        .order_by(assets::version_tag)
+        .load(conn)?;
+    let shell_rows: Vec<(i32, String)> = asset_shells::table
+        .order_by((asset_shells::version_tag, asset_shells::shell))
+        .load(conn)?;
 
-    for (tag, row) in &state.rows {
-        let Some(hash) = row.hash.as_deref().filter(|h| !h.is_empty()) else {
+    let mut shells_by_tag: HashMap<i32, BTreeSet<String>> = HashMap::new();
+    for (tag, shell) in shell_rows {
+        shells_by_tag.entry(tag).or_default().insert(shell);
+    }
+
+    let mut by_uuid: BTreeMap<String, Vec<ExportedEntry>> = BTreeMap::new();
+    for asset in hashed {
+        let Some(hash) = asset.hash.filter(|h| !h.is_empty()) else {
             continue;
         };
-        assets += 1;
+        let shells = shells_by_tag
+            .get(&asset.version_tag)
+            .map(|set| set.iter().cloned().collect())
+            .unwrap_or_default();
         by_uuid
-            .entry(row.uuid.clone())
+            .entry(asset.uuid.clone())
             .or_default()
             .push(ExportedEntry {
-                v: row.version,
-                t: *tag,
-                h: hash.to_owned(),
-                s: row.shells.iter().cloned().collect(),
+                v: asset.version,
+                t: asset.version_tag,
+                h: hash,
+                s: shells,
             });
     }
 
     for entries in by_uuid.values_mut() {
         entries.sort_by(|a, b| b.v.cmp(&a.v).then(b.t.cmp(&a.t)));
     }
+    let assets_total: usize = by_uuid.values().map(Vec::len).sum();
 
     fs::create_dir_all(out_dir)?;
     let mut shards: Vec<BTreeMap<&str, &Vec<ExportedEntry>>> = vec![BTreeMap::new(); SHARDS];
@@ -76,6 +96,6 @@ pub fn export(state: &State, out_dir: &Path) -> Result<(usize, usize)> {
         fs::write(out_dir.join(format!("data_{idx}.json")), json)?;
     }
 
-    info!(extensions = by_uuid.len(), assets, dir = %out_dir.display(), "export written");
-    Ok((by_uuid.len(), assets))
+    info!(extensions = by_uuid.len(), assets = assets_total, dir = %out_dir.display(), "export written");
+    Ok((by_uuid.len(), assets_total))
 }

@@ -34,8 +34,10 @@ jobs:
         run: |
           if git ls-remote --exit-code origin db >/dev/null 2>&1; then
             git fetch origin db --depth 1
-            git checkout origin/db -- state.json
-            echo "restored state.json from origin/db"
+            git checkout origin/db -- db.sqlite3.tar.xz
+            tar -xf db.sqlite3.tar.xz
+            rm db.sqlite3.tar.xz
+            echo "restored db.sqlite3 from origin/db"
           else
             echo "no previous state; starting fresh"
           fi
@@ -80,12 +82,15 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The exporter vacuums the database before exiting; pack it like
+          # nix4vscode does for its sqlite state.
+          tar -cjf db.sqlite3.tar.xz db.sqlite3
           git checkout --orphan update-db
           git rm -rf --cached . -q
-          git add -f state.json
+          git add -f db.sqlite3.tar.xz
           git commit -m "update exporter state"
           git push origin update-db:db --force
           # Move HEAD back to master without touching index or worktree;
-          # plain `git checkout -` would abort on the now-untracked files.
+          # plain `git checkout -` would abort on now-untracked files.
           git symbolic-ref HEAD refs/heads/master
           git reset --mixed

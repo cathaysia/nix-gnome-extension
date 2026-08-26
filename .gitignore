@@ -1,5 +1,5 @@
 /target
-/state.json
-/state.json.tmp
+/db.sqlite3
+/db.sqlite3-*
 /result
 .direnv/

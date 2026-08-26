@@ -1,16 +1,24 @@
-//! Enumeration phase: paginate `/extension-query/` until an empty page.
+//! Enumeration phase: paginate `/extension-query/` until an empty page,
+//! upserting assets and their shell compatibility rows into SQLite.
+
+use std::time::Duration;
 
 use anyhow::Result;
+use diesel::prelude::*;
 use tracing::{info, warn};
 
-use crate::{api::GnomeClient, state::Row, state::State};
+use crate::{
+    api::GnomeClient,
+    models::{Asset, NewAsset, NewShell},
+    schema::{asset_shells, assets},
+};
 
 /// Safety valve against runaway pagination (numpages is unreliable upstream).
 const HARD_PAGE_CAP: u64 = 5000;
 
 pub async fn fetch_extensions(
     client: &GnomeClient,
-    state: &mut State,
+    conn: &mut SqliteConnection,
     sort: &str,
     max_pages: u64,
 ) -> Result<(usize, usize)> {
@@ -42,35 +50,58 @@ pub async fn fetch_extensions(
             break;
         }
 
-        for ext in &resp.extensions {
-            extensions_seen += 1;
-            for (shell, ver) in &ext.shell_version_map {
-                let row = state.rows.entry(ver.pk).or_insert_with(|| {
-                    rows_added += 1;
-                    Row {
-                        uuid: ext.uuid.clone(),
-                        version: ver.version,
-                        shells: Default::default(),
-                        hash: None,
+        let extensions = &resp.extensions;
+        conn.transaction::<_, diesel::result::Error, _>(|tx| {
+            for ext in extensions {
+                extensions_seen += 1;
+                for (shell, ver) in &ext.shell_version_map {
+                    let Ok(tag) = i32::try_from(ver.pk) else {
+                        warn!(pk = ver.pk, uuid = %ext.uuid, "version tag out of range");
+                        continue;
+                    };
+                    let existing: Option<Asset> = assets::table.find(tag).first(tx).optional()?;
+                    match existing {
+                        None => {
+                            diesel::insert_into(assets::table)
+                                .values(NewAsset {
+                                    version_tag: tag,
+                                    uuid: &ext.uuid,
+                                    version: i32::try_from(ver.version).unwrap_or(i32::MAX),
+                                })
+                                .on_conflict_do_nothing()
+                                .execute(tx)?;
+                            rows_added += 1;
+                        }
+                        Some(ref asset) if asset.uuid != ext.uuid => {
+                            warn!(
+                                tag,
+                                kept = %asset.uuid,
+                                seen = %ext.uuid,
+                                "version tag shared by different extensions; keeping first"
+                            );
+                            continue;
+                        }
+                        Some(_) => {}
                     }
-                });
-                if row.uuid != ext.uuid {
-                    warn!(
-                        tag = ver.pk,
-                        existing = %row.uuid,
-                        incoming = %ext.uuid,
-                        "version tag shared by different extensions; keeping first"
-                    );
-                    continue;
+                    diesel::insert_into(asset_shells::table)
+                        .values(NewShell {
+                            version_tag: tag,
+                            shell,
+                        })
+                        .on_conflict_do_nothing()
+                        .execute(tx)?;
                 }
-                row.version = ver.version;
-                row.shells.insert(shell.clone());
             }
-        }
+            Ok(())
+        })?;
 
         if page.is_multiple_of(25) {
-            info!(page, assets = state.rows.len(), "enumerating");
+            let count: i64 = assets::table
+                .select(diesel::dsl::count_star())
+                .get_result(conn)?;
+            info!(page, assets = count, "enumerating");
         }
+        tokio::time::sleep(Duration::from_millis(50)).await;
         page += 1;
     }
 
