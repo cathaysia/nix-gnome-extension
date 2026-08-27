@@ -21,10 +21,21 @@ let
           builtins.readDir dataPath
         )
       );
+      parseFile =
+        acc: file:
+        let
+          data = builtins.fromJSON (builtins.readFile (dataPath + "/${file}"));
+        in
+        if builtins.isList data then
+          # new format: [ {uuid, v, t, h, s}, ... ] — one object per line
+          builtins.foldl' (
+            m: e: m // { ${e.uuid} = (m.${e.uuid} or [ ]) ++ [ { inherit (e) v t h s; } ]; }
+          ) acc data
+        else
+          # legacy map format compat
+          acc // data;
     in
-    lib.foldl' (
-      acc: file: acc // builtins.fromJSON (builtins.readFile (dataPath + "/${file}"))
-    ) { } files;
+    lib.foldl' parseFile { } files;
 
   # Accepts either "uuid" / "uuid.<int version>" strings (a trailing
   # all-digit segment is a version pin; uuid hosts never end in digits) or

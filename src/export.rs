@@ -1,15 +1,18 @@
 //! Export phase: emit deterministic sharded JSON consumed by the Nix library.
 //!
-//! Schema per shard:
+//! Schema per shard (map, one version object per line):
 //!
 //! ```json
-//! { "<uuid>": [ { "v": 72, "t": 69740, "h": "<nix base32 sha256>", "s": ["46","47"] } ] }
+//! {
+//! "uuid": [
+//! {"v":72,"t":69740,"h":"<nix base32 sha256>","s":["46","47"]}
+//! ]
+//! }
 //! ```
 //!
-//! - `v`: extension version number, `t`: version tag for the download URL,
-//!   `h`: Nix base32 SHA-256, `s`: compatible GNOME Shell major versions.
-//! - Entries sorted by descending version, keys alphabetical, shards assigned
-//!   by FNV-1a so output is byte-stable across runs.
+//! - `v`: extension version number, `t`: version tag,
+//!   `h`: Nix base32 SHA-256, `s`: compatible GNOME Shell versions.
+//! - Shards assigned by FNV-1a so output is byte-stable across runs.
 
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::fs;
@@ -27,8 +30,8 @@ use crate::{
 
 const SHARDS: usize = 16;
 
-#[derive(Debug, Serialize)]
-struct ExportedEntry {
+#[derive(Debug, Clone, Serialize)]
+struct VersionEntry {
     v: i32,
     t: i32,
     h: String,
@@ -59,7 +62,8 @@ pub fn export(conn: &mut SqliteConnection, out_dir: &Path) -> Result<(usize, usi
         shells_by_tag.entry(tag).or_default().insert(shell);
     }
 
-    let mut by_uuid: BTreeMap<String, Vec<ExportedEntry>> = BTreeMap::new();
+    let mut shards: Vec<BTreeMap<String, Vec<VersionEntry>>> = vec![BTreeMap::new(); SHARDS];
+    let mut extensions_set: BTreeSet<String> = BTreeSet::new();
     for asset in hashed {
         let Some(hash) = asset.hash.filter(|h| !h.is_empty()) else {
             continue;
@@ -68,10 +72,12 @@ pub fn export(conn: &mut SqliteConnection, out_dir: &Path) -> Result<(usize, usi
             .get(&asset.version_tag)
             .map(|set| set.iter().cloned().collect())
             .unwrap_or_default();
-        by_uuid
-            .entry(asset.uuid.clone())
+        let idx = fnv1a(&asset.uuid) as usize % SHARDS;
+        extensions_set.insert(asset.uuid.clone());
+        shards[idx]
+            .entry(asset.uuid)
             .or_default()
-            .push(ExportedEntry {
+            .push(VersionEntry {
                 v: asset.version,
                 t: asset.version_tag,
                 h: hash,
@@ -79,23 +85,47 @@ pub fn export(conn: &mut SqliteConnection, out_dir: &Path) -> Result<(usize, usi
             });
     }
 
-    for entries in by_uuid.values_mut() {
-        entries.sort_by(|a, b| b.v.cmp(&a.v).then(b.t.cmp(&a.t)));
+    for shard in &mut shards {
+        for entries in shard.values_mut() {
+            entries.sort_by(|a, b| b.v.cmp(&a.v).then(b.t.cmp(&a.t)));
+        }
     }
-    let assets_total: usize = by_uuid.values().map(Vec::len).sum();
+    let assets_total: usize = shards
+        .iter()
+        .map(|m| m.values().map(Vec::len).sum::<usize>())
+        .sum();
 
+    // Use compact per-object serialization to keep one version object per line,
+    // while still using the ported mini_json module for other cases.
+    // Manual here ensures `s` stays compact `["46","47"]` instead of being
+    // expanded one string per line by mini_json's generic seq handling.
     fs::create_dir_all(out_dir)?;
-    let mut shards: Vec<BTreeMap<&str, &Vec<ExportedEntry>>> = vec![BTreeMap::new(); SHARDS];
-    for (uuid, entries) in &by_uuid {
-        let idx = fnv1a(uuid) as usize % SHARDS;
-        shards[idx].insert(uuid.as_str(), entries);
-    }
-
     for (idx, shard) in shards.iter().enumerate() {
-        let json = crate::mini_json::to_string(shard);
+        let json = if shard.is_empty() {
+            "{}".to_string()
+        } else {
+            let mut out = String::from("{\n");
+            for (i, (uuid, entries)) in shard.iter().enumerate() {
+                out.push_str(&format!("\"{}\": [\n", uuid));
+                for (j, entry) in entries.iter().enumerate() {
+                    out.push_str(&serde_json::to_string(entry).unwrap());
+                    if j + 1 < entries.len() {
+                        out.push(',');
+                    }
+                    out.push('\n');
+                }
+                out.push(']');
+                if i + 1 < shard.len() {
+                    out.push(',');
+                }
+                out.push('\n');
+            }
+            out.push('}');
+            out
+        };
         fs::write(out_dir.join(format!("data_{idx}.json")), json)?;
     }
 
-    info!(extensions = by_uuid.len(), assets = assets_total, dir = %out_dir.display(), "export written");
-    Ok((by_uuid.len(), assets_total))
+    info!(extensions = extensions_set.len(), assets = assets_total, dir = %out_dir.display(), "export written");
+    Ok((extensions_set.len(), assets_total))
 }
