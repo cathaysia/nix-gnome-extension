@@ -110,6 +110,9 @@
 {"v":4,"t":15226,"h":"1mq97arh3sbkyzsd2hmwbb5irxr6g8pcidbwy04cg5md2kj89mp3","s":["3.36"]},
 {"v":2,"t":14018,"h":"0km11720ps9msflrw2z7h5d9zyakzr2jawipqjh10cl4q507fxq8","s":["3.28","3.30","3.32","3.34"]}
 ],
+"ambed-fly@walid": [
+{"v":1,"t":74436,"h":"12v95k6lma169ib5gv7skixj282gsqb4jskm0ncm05sb3m1d0lwm","s":["45","46","47","48","49","50"]}
+],
 "apcups-monitor@anduin2017": [
 {"v":4,"t":68474,"h":"10ig56php7c119m2idxb2c5lj1hj3ps65ssvfka88mjd2f1lzh3v","s":["45","46","47","48","49"]}
 ],
@@ -607,6 +610,7 @@
 {"v":11,"t":39213,"h":"1ccam8xqx60c9bih4xy4p9bkzxc5xlq6rjgjmhisbxhr2pvz3i08","s":["40","41","42","43","44"]}
 ],
 "runcat@kolesnikov.se": [
+{"v":36,"t":74450,"h":"0kib5qfnh6qni297mm81y04f1z3l0d3ghdjlkfazs0bzrz8jggnv","s":["46","47","48","49","50"]},
 {"v":32,"t":69885,"h":"0sk94zdbfpgnq9i8aka84qsw3cpz5yklrlkw9rny9lw8ang5zvbq","s":["46","47","48","49","50"]},
 {"v":28,"t":57795,"h":"0xr3r9056pg1cwynr40klk5ckj98dfkm0vbxz23y0dr5ywvb200h","s":["45"]},
 {"v":23,"t":39582,"h":"13x6cj1d7nig2b2p24pzvpw4i7p7zbdnabmacsxbsrj2m9cxlkp6","s":["42","43","44"]},
