@@ -92,6 +92,8 @@
 {"v":10,"t":7439,"h":"016scghbzwa3y7ky4g3rz02ri752xgsribk22rigpnr5y5517624","s":["3.14","3.16","3.18","3.20","3.22","3.24","3.26"]}
 ],
 "SmartAutoMoveNG@lauinger-clan.de": [
+{"v":73,"t":74488,"h":"00lx4cxalb7jlhxgah2sy7xdm293n52c7dlp9d7jxk000xgz4n0j","s":["51"]},
+{"v":72,"t":74487,"h":"01nz1blbzw6n04i67dmdcj6lndkmbn6hl9qnwb4anmrw77d0cx0j","s":["50"]},
 {"v":65,"t":73517,"h":"1b98avcx9aqi5jz3jplp9gcky8fg56asmak7hdlqlkc9fmifnjrl","s":["50"]},
 {"v":56,"t":71109,"h":"0q0rjjfazac03ggskara1h3v88gb3vfww072fc6895a1jrb1m543","s":["48","49"]},
 {"v":14,"t":63866,"h":"1mkbqmgv6zjy3c0lxn01s6wpkgpdfpzdasvgkyjxradvnva9npzx","s":["47"]},
@@ -263,6 +265,7 @@
 {"v":2,"t":73264,"h":"19pav1qc7rllrz6m07281w4jyxiqclwz3nblxnm7fbs6p9b5k7mx","s":["45","46","47","48","49","50"]}
 ],
 "custom-command-toggle@storageb.github.com": [
+{"v":14,"t":74478,"h":"1wp30gypwp2hy7p6j66202vh44sx5fwcs089d3vqiczgwl023xzm","s":["45","46","47","48","49","50","51"]},
 {"v":13,"t":69075,"h":"03ihrnc1w7s41l83qbwxn866vw1spcm53dphw4xz43v7lnil5jwg","s":["45","46","47","48","49","50"]}
 ],
 "custom-osd@neuromorph": [
