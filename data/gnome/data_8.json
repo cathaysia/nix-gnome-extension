@@ -257,6 +257,9 @@
 "claude-quota@zeppelinlg": [
 {"v":5,"t":74030,"h":"0zsbrpnmdh825i2dghnn10b8005c603smfy8nsfxa81rl5caiirh","s":["45","46","47","48","49","50"]}
 ],
+"claudeland@fabiosm46.dev": [
+{"v":1,"t":74492,"h":"1gx3icrx3k3jp02p14yq4b2x9n343zlaqvfw221yvsi6j3l94dwm","s":["46","50"]}
+],
 "clock-override@gnomeshell.kryogenix.org": [
 {"v":12,"t":9171,"h":"1jhpz558jzzmwz5nnwg8pbxliz0ifdyadb4pynlrrsac9vzljbn1","s":["3.18","3.28"]},
 {"v":3,"t":6841,"h":"0bssa1jz85cm05f59axr3k28rvcy78xw3nfi7r0dfb80ajd9d7yr","s":["3.16"]}
@@ -826,6 +829,7 @@
 {"v":2,"t":48328,"h":"0w0ciinmr322yq3jlz6gw7b0dm3rplnq4isiy28wv8rq4j3bgd2w","s":["45"]}
 ],
 "tandem-raise@tomdryer.com": [
+{"v":8,"t":74523,"h":"07idf8s94yfd90gm4xb1s9x48f48ck1mda52771dk95xz6nimvn1","s":["50"]},
 {"v":7,"t":59867,"h":"0ahz97hgjpjsd8y44wyd7z09jhjkp3nmswva40ha0556lp65p2m1","s":["46","47"]},
 {"v":5,"t":53422,"h":"1yj25srl75r1xh8sndpjnv8gfcr3ydpy6ywqkir836hzmza4klrv","s":["3.30","3.36","42"]},
 {"v":3,"t":31826,"h":"0k7jq18p2fy13d6jwcx6kxb24czkg44hfdapkmrqhvqrwi8adlim","s":["3.28"]}

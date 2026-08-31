@@ -514,6 +514,7 @@
 {"v":6,"t":1195,"h":"0v062dfqmfwxgx5l0a7mgyx568f0vjhvxw5c0mx20qg5dbl27baf","s":["3.2","3.2.1","3.2.2","3.3.2","3.3.3","3.3.4","3.3.5","3.3.90","3.3.92"]}
 ],
 "nowplay@LalaloyXyz": [
+{"v":5,"t":74504,"h":"0kilcscb2s4if7k13z1shicqwdbhcmmqj7ca0mdwmy7giqzlqi9s","s":["46","47","48","49","50"]},
 {"v":2,"t":71607,"h":"0884i7jq07ch15naiyw1isd86v11kxl5bi4j51q3kn9m9bwz306l","s":["46","47","48","49","50"]}
 ],
 "obmin@konkor": [
@@ -525,6 +526,9 @@
 ],
 "onboard-shortcut@sodae.cz": [
 {"v":1,"t":8009,"h":"0zi08a3xb0shih2cz5jx3q1ckkjc8q6dnv9xm8w94z0mxm4c9af4","s":["3.26.2"]}
+],
+"openf1dashboard@ansilva": [
+{"v":4,"t":74518,"h":"11v9nl1ymcmp4w1m3r9r7bd7f9bbzrvi2gkfhvq793bllwhvjbgj","s":["50"]}
 ],
 "osd-volume-brightness-percentage@deminder-muharemovic": [
 {"v":2,"t":70282,"h":"0zmdvrq49m9z3kcm7ahgi6f3ymr8vny66zs1nn3x9p0xlv71w686","s":["49","50"]}
@@ -741,6 +745,9 @@
 {"v":20,"t":66549,"h":"0k43x9mpq9b4rf5l5mcg2h0i6ckvis6mdsr6dj04dh7a7swz385z","s":["45","46","47","48","49"]},
 {"v":12,"t":41940,"h":"1kxl7xksi5wrzn31193hah1dmdgxl822afp4nl042bc4cwqk5rz5","s":["40","41","42","43","44"]},
 {"v":9,"t":36154,"h":"02sjxm40fxf35jwfj1qwjmv0h3fcngia9p0n5gv57kihwglp9r1k","s":["3.36","3.38"]}
+],
+"victron-live-state@wows.dev": [
+{"v":2,"t":74505,"h":"0rwg5i1g4afns56ix15vqp86m54rphjppij7fzp7cwakb01badnn","s":["45","46","47","48","49","50"]}
 ],
 "volume-osd-always@alexandrecvieira.github.io": [
 {"v":8,"t":40746,"h":"0zsd5nmx251nq5kvx9sn9a0fmn0lq5rybpixiwd7vamig7kwqjjd","s":["42","43","44"]}
