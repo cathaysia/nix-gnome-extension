@@ -128,6 +128,7 @@
 {"v":4,"t":12931,"h":"18nwb0qmyigw8bavq0vsr9rxjkxx96fjxksfcq4hxasc87lvhhfn","s":["3.28","3.30","3.32","3.34"]}
 ],
 "battery-limit@aditya": [
+{"v":4,"t":74655,"h":"0z8315lqg4fnyl8kpmh37i4cjkqaabdids7d7dmk9knxbspjimmd","s":["46","47","48","49","50"]},
 {"v":3,"t":71384,"h":"0dgxm94c7w1c35kvrwphjszw6pk3kij6sgqkqxpy25w31jiv0ba5","s":["46"]}
 ],
 "battery-monitor@vladyslav.local": [
@@ -726,6 +727,9 @@
 ],
 "window-fade-in@suhy17.gmail.com": [
 {"v":1,"t":2008,"h":"05wxlk74w2nm8bzcp7scrwx8857wpwizvr9j1pghks03m2gp1y96","s":["3.4","3.4.1","3.6"]}
+],
+"window-shuffle@digitalspace.name": [
+{"v":1,"t":74654,"h":"1hlahpa0wlnxr63wr2lj9bx4xsqhkaws05gf4rh20gxl11cyxhcy","s":["50"]}
 ],
 "windowlist@o2net.cl": [
 {"v":4,"t":1289,"h":"0dw4r2pwygpbwi9cai5mdzipkp34895rii14vcasibkahf8z5lny","s":["3.4"]},

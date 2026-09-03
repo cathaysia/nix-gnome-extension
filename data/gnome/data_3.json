@@ -27,6 +27,7 @@
 {"v":3,"t":72562,"h":"0rc2f492d1wpqa43sspbki34r8fdxwwq3bzzc4gvimyg928vmgmq","s":["45","46","47","48","49","50"]}
 ],
 "Studi-Brightness-Control@matey-0": [
+{"v":8,"t":74662,"h":"0d1jhxrlmjwy1qf2q6smxh8q0wrbydpigpmv06fq8w8sp6ycxn01","s":["48","49","50","51"]},
 {"v":7,"t":69671,"h":"11j7dpajx5h2phv0qw5fr738yzk1zwx8bz6imsiprjm7vddpzpsf","s":["48","49","50"]}
 ],
 "TaskTimer@rothirsch.tech": [
@@ -109,6 +110,7 @@
 {"v":5,"t":32827,"h":"0y9x4yxvv9g09f0rim5i3xxc0mhb3c6m2xvyplia8vgry19gdf0i","s":["42"]}
 ],
 "auto-move-windows@gnome-shell-extensions.gcampax.github.com": [
+{"v":76,"t":74639,"h":"1wn3dsrh5hggzhw8c9x6hw3frn54v8v4a8p2pgm88gjnfv33z86j","s":["51"]},
 {"v":75,"t":73990,"h":"0b86yksdy09w8dviabm7sb6zld8dpk9l963281lbpysw31f7yfx3","s":["50"]},
 {"v":74,"t":72316,"h":"12sjxwx75vvcdzjq3alc6gh0lb98im8f6pk1d2ra3ayi3bvm0sl4","s":["51"]},
 {"v":68,"t":65077,"h":"02125234s7p1kgzn48kyfcd2r0zvw741q7iw9a00271y47mbx7yq","s":["49"]},
@@ -294,6 +296,9 @@
 ],
 "dynamicTopBar@gnomeshell.feildel.fr": [
 {"v":14,"t":5866,"h":"0lw3ibiw0j90cc9sqdmgss6vcjhg5wmrh1j62xa37apapahfmalb","s":["3.10","3.12","3.14","3.16","3.18","3.20"]}
+],
+"enet-speed@meharehsaan.github.io": [
+{"v":5,"t":74635,"h":"1nb2nf4ph72ccn441ysn485gzcdr6849kydjxc1blr8dm2h9f54f","s":["45","46","47","48","49","50"]}
 ],
 "espresso@coadmunkee.github.com": [
 {"v":10,"t":54766,"h":"0myr3kqinbcf9kb02n3ggm1075zhcxpw7h9s5w9gb7naz0j2xm4f","s":["46"]},
@@ -662,6 +667,7 @@
 {"v":1,"t":69007,"h":"0j5izlswm705xxrf6ars78g2va2cvahwlfh5j96cpxknsjy63d79","s":["47","48","49","50"]}
 ],
 "screenshot-window-sizer@gnome-shell-extensions.gcampax.github.com": [
+{"v":58,"t":74645,"h":"08kkmn09w1xkxnkjh3fkv4sd2nci7czf2yyj305612wgc2b9ry5l","s":["51"]},
 {"v":57,"t":73996,"h":"0kq1mbnzshb0nsnsx1xmi4g9x2plb5r0vca34lvarrf559mfip3z","s":["50"]},
 {"v":56,"t":72322,"h":"06g0w81ya40a9pw1isyfx7ngn4g8vh1a9pgrllarq8yzmffwyjkk","s":["51"]},
 {"v":50,"t":65083,"h":"0gi48ig45za4bxvnnc5a2qam578a5wnrnryqksz55cxsh1nryxpl","s":["49"]},

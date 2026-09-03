@@ -154,6 +154,7 @@
 {"v":6,"t":70697,"h":"1h6mbz72yk1bwkp8a3f781gh2nbmw5kvjwy7z33c61v3xkzin1iv","s":["49","50"]}
 ],
 "apps-menu@gnome-shell-extensions.gcampax.github.com": [
+{"v":78,"t":74638,"h":"1gxzsk2gh7jrfvccjcm23dlwr3c2x3mmf98z01zj7hdh5mn6qwmj","s":["51"]},
 {"v":77,"t":73989,"h":"18viv0k6zgl57kn4dkrlw2wlihhzywql22zwhhg7pnnd90ng1n24","s":["50"]},
 {"v":76,"t":72315,"h":"0sbkpn8z13lixsk7gd98b7a68h2jp1qshbl78fawaahrv76dv5ak","s":["51"]},
 {"v":70,"t":65076,"h":"0yz0b78rlvyh5c1zvgz5hh3zvihqbmphiz8f020jq8rrjcdj8i84","s":["49"]},
@@ -519,6 +520,7 @@
 {"v":12,"t":42831,"h":"154fph4pxymmsmidbxqk02d3d3vksljc7iv9c87x0jh6h53v1s17","s":["3.36","3.38","40","41","42","43","44"]}
 ],
 "native-window-placement@gnome-shell-extensions.gcampax.github.com": [
+{"v":78,"t":74643,"h":"1nlkw61gzqdirdm05x5k58phykwiq5152w5x2ng0lqx5pbkz7a71","s":["51"]},
 {"v":77,"t":73994,"h":"1yycd1vhqa2jyrchqzidqqy2snydv6lpfhq8vg5yn5pfgrscwwmg","s":["50"]},
 {"v":76,"t":72320,"h":"0c14q3nc7qkzsjckys0r6nqam2xfagrgl2ni0kbx1gm3iv1vjjyg","s":["51"]},
 {"v":70,"t":65081,"h":"11xzaf078dmkjff9w4fnncpca555z6jpgrfa77jj57v4kj0yghza","s":["49"]},
@@ -625,6 +627,7 @@
 {"v":1,"t":69182,"h":"11b0d37a2vgwi0wdyzp86gbcfa8wkgadlviw5h4716vrgj97cbl8","s":["46","47","48","49"]}
 ],
 "places-menu@gnome-shell-extensions.gcampax.github.com": [
+{"v":82,"t":74644,"h":"1baign83fbj9b4pid6fr91210kzim3w3945n774lk0q2096hayhl","s":["51"]},
 {"v":81,"t":73995,"h":"1hcfw0fzq7168bplzlrk1dalhxd80wyaiy9xmf7xk04ag80hx11i","s":["50"]},
 {"v":80,"t":72321,"h":"1369faz74slyk9ci7n9yw10dyka9vqvhn672s0yj2qvbadib6phd","s":["51"]},
 {"v":74,"t":65082,"h":"0zdshd430kynmjxjhdbj3jz66msx28wkw5cqkbri4q066drwf50w","s":["49"]},

@@ -303,6 +303,9 @@
 {"v":4,"t":9514,"h":"1jbsw535513iw6m0w46m3d3qrxlgmkj85r3fdfxp0sj41g0j0r6j","s":["3.32"]},
 {"v":3,"t":6793,"h":"1h3xa1q0d2i35w1q49j736d2fv44hy4zb5v1pl114q08wfm98471","s":["3.20","3.22","3.24"]}
 ],
+"gnome-shell-session-timer@firebirdberlin": [
+{"v":4,"t":74637,"h":"1pkfj8bv6af7dadk1r37w09isr48kjnmbgk9jjnj1gqqlvl85i93","s":["45","46","47","48","49","50"]}
+],
 "gnome-wallpaper-engine@gjs.com": [
 {"v":8,"t":70472,"h":"18ai7lsfz5jdizgfd2xhx633al6i4b8rp58x3yl9h0gx82dlxjmr","s":["45","46","47","48","49","50"]}
 ],
@@ -653,6 +656,7 @@
 {"v":1,"t":69524,"h":"02q5s7ih6m9islb5gq98nanq0ggph8nlrj85s6aafd6g4pawhsqp","s":["45","46","47","48","49","50"]}
 ],
 "system-monitor@gnome-shell-extensions.gcampax.github.com": [
+{"v":22,"t":74647,"h":"01zci2mg92s3c9lyss3a97f753rym1zwlvb1qipcynvm90yabcfn","s":["51"]},
 {"v":21,"t":73998,"h":"0333qqf5jsnjfyms86mj34b2ml95ysh801lsyjckh3hc5gwgzyjy","s":["50"]},
 {"v":20,"t":72324,"h":"033m33dikw9qhkh5ps54drwv2b67zz9v0549i4i41l09jmv5ka1g","s":["51"]},
 {"v":14,"t":65085,"h":"00xlgi9lv59b99l5y7y5gnn3d6fqbixnyrr03v5r0dqyj82by2kn","s":["49"]},
@@ -801,6 +805,7 @@
 {"v":5,"t":2710,"h":"1lq6kd7n96p80hl1gwbaz4apyhirdj0mywygrpvp92a4a0rxw3cq","s":["3.0","3.2","3.3.4"]}
 ],
 "windowsNavigator@gnome-shell-extensions.gcampax.github.com": [
+{"v":90,"t":74650,"h":"1r53h7vcy1s0xjpcf1nzags6k0f6mibkavv189h4pf8ipxvqh86q","s":["51"]},
 {"v":89,"t":74001,"h":"1kc7jglnk8497jiwxb17mg9kzqlpz1bi93sgbakf0dgw62ngvb8x","s":["50"]},
 {"v":88,"t":72327,"h":"1dyjk07mphxls6c8rw4adck4lh3qm9z74b6hvvfgdcg28vkmwanl","s":["51"]},
 {"v":82,"t":65088,"h":"00hqky62dbvsp4fcldlqp3if5rydbzlxrj84rg91sblzq7dys82y","s":["49"]},
