@@ -92,6 +92,7 @@
 {"v":10,"t":7439,"h":"016scghbzwa3y7ky4g3rz02ri752xgsribk22rigpnr5y5517624","s":["3.14","3.16","3.18","3.20","3.22","3.24","3.26"]}
 ],
 "SmartAutoMoveNG@lauinger-clan.de": [
+{"v":74,"t":74706,"h":"1ql1yl6xzmp949byqvdsvdj5d8kzs575fhy3q7cpix57qrnpd5y9","s":["50","51"]},
 {"v":73,"t":74488,"h":"00lx4cxalb7jlhxgah2sy7xdm293n52c7dlp9d7jxk000xgz4n0j","s":["51"]},
 {"v":72,"t":74487,"h":"01nz1blbzw6n04i67dmdcj6lndkmbn6hl9qnwb4anmrw77d0cx0j","s":["50"]},
 {"v":65,"t":73517,"h":"1b98avcx9aqi5jz3jplp9gcky8fg56asmak7hdlqlkc9fmifnjrl","s":["50"]},
@@ -366,6 +367,9 @@
 ],
 "floating-mini-panel@ghi59.github.com": [
 {"v":8,"t":65841,"h":"19l53vdf0nz9dxavfhxr1wfp7j3vqmdmbjyld4narsilzf8s37pw","s":["46","47","48","49"]}
+],
+"focus-tracker@haris-a11.github.io": [
+{"v":2,"t":74616,"h":"02kzgh77x17dkhn4anj91zwzmlvvmrynqs092j6ydih01fij1aij","s":["46","47","48","49","50"]}
 ],
 "focused-window-dbus@flexagoon.com": [
 {"v":11,"t":70794,"h":"19hbhinpnbp38j30gw5cy29cdi5dgg11yw48rs0s779fa17j3003","s":["49","50"]},
