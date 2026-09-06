@@ -705,6 +705,7 @@
 {"v":11,"t":32331,"h":"0fmwk18r0cjsp5rm2fs3nfynzvx8d5b20h33239ays5g9b25v3w1","s":["3.30","3.32","3.34","3.36","3.38","40","41","42"]}
 ],
 "tweaks-system-menu@extensions.gnome-shell.fifi.org": [
+{"v":28,"t":74768,"h":"0sq3b18lcs36rcpszvixarvrzlk2gpxwdix730903cr89iswfh6a","s":["45","46","47","48","49","50","51"]},
 {"v":27,"t":68631,"h":"1knw5cnx6g0l0dvgqr7h72rjbx49l1y4i4dzgl8rlkz3yg1q8j1i","s":["45","46","47","48","49","50"]},
 {"v":18,"t":30156,"h":"0fdqbvm0kwy34s107sdbj4xxiddn81vdfyg56pz8qgivr8qjmhvf","s":["3.35.92","3.36","3.38","40","41","42"]},
 {"v":16,"t":28508,"h":"0wc9r8wd73g1f2lxbysfvhp4pd92fwplg22909y4ksc43ii0v9k9","s":["40.0","41.0"]},
